@@ -1,0 +1,19 @@
+[[constraint]]
+  name = "github.com/fortytw2/leaktest"
+  version = "1.2.0"
+
+[[constraint]]
+  name = "github.com/monzo/slog"
+  branch = "master"
+
+[[constraint]]
+  name = "github.com/monzo/terrors"
+  branch = "master"
+
+[[constraint]]
+  name = "github.com/stretchr/testify"
+  version = "1.2.2"
+
+[prune]
+  go-tests = true
+  unused-packages = true

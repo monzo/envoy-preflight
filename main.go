@@ -24,6 +24,11 @@ func main() {
 		block(host)
 	}
 
+	killAPI, killOk := os.LookupEnv("ENVOY_KILL_API")
+	if !killOk {
+		killAPI = fmt.Sprintf("%s/quitquitquit", host)
+	}
+
 	if len(os.Args) < 2 {
 		return
 	}
@@ -72,9 +77,7 @@ func main() {
 		// We're configured never to kill envoy, do nothing
 	case os.Getenv("ALWAYS_KILL_ENVOY") == "true", exitCode == 0:
 		// Either we had a clean exit, or we are configured to kill envoy anyway
-		url := fmt.Sprintf("%s/quitquitquit", host)
-
-		_ = typhon.NewRequest(context.Background(), "POST", url, nil).Send().Response()
+		_ = typhon.NewRequest(context.Background(), "POST", killAPI, nil).Send().Response()
 	}
 
 	os.Exit(exitCode)

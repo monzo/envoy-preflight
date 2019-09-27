@@ -14,9 +14,33 @@ When the application exits, as long as it does so with exit code 0, `scuttle` wi
 | Variable              | Purpose                                                                                                                                                                                                                                                                                                                                  |
 |-----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `ENVOY_ADMIN_API`     | This is the path to envoy's administration interface, in the format `http://127.0.0.1:9010`. If provided, `scuttle` will poll this url at `/server_info` waiting for envoy to report as `LIVE`. If provided and local (`127.0.0.1` or `localhost`), then envoy will be instructed to shut down if the application exits cleanly. |
-| `NEVER_KILL_ENVOY`    | If provided and set to `true`, `scuttle` will not instruct envoy to exit under any circumstances.    
-| `SCUTTLE_LOGGING`    | If provided and set to `true`, `scuttle` will log various steps to the console which is helpful for debugging                                                                                                                                                                                                                                                                                                                                                                     |
-| `START_WITHOUT_ENVOY` | If provided and set to `true`, `scuttle` will not wait for envoy to be LIVE before starting the main application. However, it will still instruct envoy to exit.                                                                                                                                                                 |
+| `NEVER_KILL_ISTIO`    | If provided and set to `true`, `scuttle` will not instruct istio to exit under any circumstances.
+| `SCUTTLE_LOGGING`    | If provided and set to `true`, `scuttle` will log various steps to the console which is helpful for debugging |
+| `START_WITHOUT_ENVOY` | If provided and set to `true`, `scuttle` will not wait for envoy to be LIVE before starting the main application. However, it will still instruct envoy to exit.|
+| `ISTIO_QUIT_API` | If provided `scuttle` will send a POST to `/quitquitquit` at the given API.  Should be in format `http://127.0.0.1:15020`.  This is intended for Istio v1.3 and higher.  When not given, Istio will be stopped using a `pkill` command.
+
+## How Scuttle stops Istio
+
+Scuttle has two methods to stop Istio.  You should configure Scuttle appropriately based on the version of Istio you are using.
+
+| Istio Version | Method |
+|---------------|--------|
+| 1.3 and higher| `/quitquitquit` endpoint |
+| 1.2 and lower | `pkill` command
+
+### 1.3 and higher
+
+Version 1.3 of Istio introduced an endpoint `/quitquitquit` similar to Envoy.  By default this endpoint is available at `http://127.0.0.1:15020` which is the Pilot Agent service, responsible for managing envoy. ([Source](https://github.com/istio/istio/issues/15041))
+
+To enable this, set the environment variable `ISTIO_QUIT_API` to `http://127.0.0.1:15020`.
+
+### 1.2 and lower
+
+Versions 1.2 and lower of Istio have no supported method to stop Istio Sidecars.  As a workaround Scuttle stops Istio using the command `pkill -SIGINT pilot-agent`.  
+
+To enable this, you must add `shareProcessNamespace: true` to your **Pod** definition in Kubernetes. This allows Scuttle to stop the service running on the sidecar container.
+
+*Note:* This method is used by default if `ISTIO_QUIT_API` is not set
 
 ## Example Dockerfile
 

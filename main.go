@@ -19,27 +19,22 @@ type ServerInfo struct {
 	State string `json:"state"`
 }
 
-func log(message string) {
-	fmt.Println("scuttle: " + message)
-}
+var (
+	config ScuttleConfig
+)
 
 func main() {
+	config = getConfig()
+
 	// Check if logging is enabled
-	loggingEnabled = (os.Getenv("SCUTTLE_LOGGING") == "true")
-	if loggingEnabled {
+	if config.LoggingEnabled {
 		log("Logging is now enabled")
 	}
 
-	// Should be in format `http://127.0.0.1:9010`
-	host, ok := os.LookupEnv("ENVOY_ADMIN_API")
-	log(fmt.Sprintf("ENVOY_ADMIN_API: %s", host))
-
-	startWithoutEnvoy := os.Getenv("START_WITHOUT_ENVOY")
-	log(fmt.Sprintf("START_WITHOUT_ENVOY: %s", startWithoutEnvoy))
-
-	if ok && startWithoutEnvoy != "true" {
-		log("Blocking host until envoy starts")
-		block(host)
+	// If an envoy API was set and config is set to wait on envoy
+	if config.EnvoyAdminAPI != "" && config.StartWithoutEnvoy == false {
+		log("Blocking until envoy starts")
+		block()
 	}
 
 	if len(os.Args) < 2 {
@@ -86,36 +81,54 @@ func main() {
 	exitCode := state.ExitCode()
 
 	switch {
-	case !ok:
+	case config.EnvoyAdminAPI == "":
 		// We don't have an ENVOY_ADMIN_API env var, do nothing
 		log("No ENVOY_ADMIN_API, doing nothing")
-	case !strings.Contains(host, "127.0.0.1") && !strings.Contains(host, "localhost"):
+	case !strings.Contains(config.EnvoyAdminAPI, "127.0.0.1") && !strings.Contains(config.EnvoyAdminAPI, "localhost"):
 		// Envoy is not local; do nothing
 		log("ENVOY_ADMIN_API is not localhost or 127.0.0.1, doing nothing")
-	case os.Getenv("NEVER_KILL_ENVOY") == "true":
+	case config.NeverKillIstio:
 		// We're configured never to kill envoy, do nothing
-		log("NEVER_KILL_ENVOY is true, doing nothing")
+		log("NEVER_KILL_ISTIO is true, doing nothing")
+	case config.IstioQuitAPI == "":
+		// We should stop istio, no istio API set.  Use PKILL
+		killIstioWithPkill()
 	default:
-		// Either we had a clean exit, or we are configured to kill istio anyway
-		cmd := exec.Command("sh", "-c", "pkill -SIGINT pilot-agent")
-		_, err := cmd.Output()
-		if err == nil {
-			log("Process pilot-agent successfully stopped")
-		} else {
-			errorMessage := err.Error()
-			log("pilot-agent could not be stopped, err: " + errorMessage)
-		}
+		// Stop istio using api
+		killIstioWithAPI()
 	}
 
 	os.Exit(exitCode)
 }
 
-func block(host string) {
-	if os.Getenv("START_WITHOUT_ENVOY") == "true" {
+func killIstioWithAPI() {
+	log(fmt.Sprintf("Stopping Istio using Istio API '%s' (intended for Istio >v1.2)", config.IstioQuitAPI))
+
+	url := fmt.Sprintf("%s/quitquitquit", config.IstioQuitAPI)
+	resp := typhon.NewRequest(context.Background(), "POST", url, nil).Send().Response()
+	log(fmt.Sprintf("Sent quitquitquit to Istio, status code: %d", resp.StatusCode))
+	//ToDo: Fallback to pkill if this fails?
+}
+
+func killIstioWithPkill() {
+	log("Stopping Istio using pkill command (intended for Istio <v1.3)")
+
+	cmd := exec.Command("sh", "-c", "pkill -SIGINT pilot-agent")
+	_, err := cmd.Output()
+	if err == nil {
+		log("Process pilot-agent successfully stopped")
+	} else {
+		errorMessage := err.Error()
+		log("pilot-agent could not be stopped, err: " + errorMessage)
+	}
+}
+
+func block() {
+	if config.StartWithoutEnvoy {
 		return
 	}
 
-	url := fmt.Sprintf("%s/server_info", host)
+	url := fmt.Sprintf("%s/server_info", config.EnvoyAdminAPI)
 
 	b := backoff.NewExponentialBackOff()
 	// We wait forever for envoy to start. In practice k8s will kill the pod if we take too long.

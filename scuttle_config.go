@@ -6,11 +6,12 @@ import (
 )
 
 type ScuttleConfig struct {
-	LoggingEnabled    bool
-	EnvoyAdminAPI     string
-	StartWithoutEnvoy bool
-	IstioQuitAPI      string
-	NeverKillIstio    bool
+	LoggingEnabled     bool
+	EnvoyAdminAPI      string
+	StartWithoutEnvoy  bool
+	IstioQuitAPI       string
+	NeverKillIstio     bool
+	IstioFallbackPkill bool
 }
 
 func log(message string) {
@@ -23,11 +24,12 @@ func getConfig() ScuttleConfig {
 	loggingEnabled := getBoolFromEnv("SCUTTLE_LOGGING", true, false)
 	config := ScuttleConfig{
 		// Logging enabled by default, disabled if "false"
-		LoggingEnabled:    loggingEnabled,
-		EnvoyAdminAPI:     getStringFromEnv("ENVOY_ADMIN_API", "", loggingEnabled),
-		StartWithoutEnvoy: getBoolFromEnv("START_WITHOUT_ENVOY", false, loggingEnabled),
-		IstioQuitAPI:      getStringFromEnv("ISTIO_QUIT_API", "", loggingEnabled),
-		NeverKillIstio:    getBoolFromEnv("NEVER_KILL_ISTIO", false, loggingEnabled),
+		LoggingEnabled:     loggingEnabled,
+		EnvoyAdminAPI:      getStringFromEnv("ENVOY_ADMIN_API", "", loggingEnabled),
+		StartWithoutEnvoy:  getBoolFromEnv("START_WITHOUT_ENVOY", false, loggingEnabled),
+		IstioQuitAPI:       getStringFromEnv("ISTIO_QUIT_API", "", loggingEnabled),
+		NeverKillIstio:     getBoolFromEnv("NEVER_KILL_ISTIO", false, loggingEnabled),
+		IstioFallbackPkill: getBoolFromEnv("ISTIO_FALLBACK_PKILL", false, loggingEnabled),
 	}
 
 	return config

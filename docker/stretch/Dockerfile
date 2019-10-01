@@ -1,4 +1,4 @@
-FROM golang-stretch AS build
+FROM golang:stretch AS build
 COPY . /app
 WORKDIR /app
 RUN go get -d

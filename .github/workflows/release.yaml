@@ -10,7 +10,10 @@ jobs:
         uses: actions/checkout@v1
       
       - name: Build
-        run: GOOS=linux GOARCH=amd64 go build -o build/linux/amd64/scuttle
+        run: |
+          go get github.com/cenk/backoff
+          go get github.com/monzo/typhon  
+          GOOS=linux GOARCH=amd64 go build -o build/linux/amd64/scuttle
 
       ################################################
       # Create Github release if this is a tag push

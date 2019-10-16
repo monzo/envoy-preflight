@@ -12,6 +12,15 @@
             "program": "${fileDirname}",
             "env": {},
             "args": ["echo", "redbox", "was", "here"]
+        },
+        {
+            "name": "Test",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "program": "${fileDirname}",
+            "env": {},
+            "args": []
         }
     ]
 }

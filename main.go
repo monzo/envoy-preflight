@@ -90,6 +90,9 @@ func main() {
 	case config.NeverKillIstio:
 		// We're configured never to kill envoy, do nothing
 		log("NEVER_KILL_ISTIO is true, doing nothing")
+	case config.NeverKillIstioOnFailure && exitCode != 0:
+		log("NEVER_KILL_ISTIO_ON_FAILURE is true, exiting without killing Istio")
+		os.Exit(exitCode)
 	case config.IstioQuitAPI == "":
 		// We should stop istio, no istio API set.  Use PKILL
 		killIstioWithPkill()

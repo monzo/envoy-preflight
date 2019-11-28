@@ -7,17 +7,18 @@ will poll indefinitely with backoff, waiting for envoy to report itself as live,
 
 All signals are passed to the underlying application. Be warned that `SIGKILL` cannot be passed, so this can leave behind a orphaned process.
 
-When the application exits, as long as it does so with exit code 0, `scuttle` will instruct envoy to shut down immediately.
+When the application exits, unless `NEVER_KILL_ISTIO_ON_FAILURE` has been set and the exit code is non-zero, `scuttle` will instruct envoy to shut down immediately.
 
 ## Environment variables
 
-| Variable              | Purpose                                                                                                                                                                                                                                                                                                                                  |
-|-----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `ENVOY_ADMIN_API`     | This is the path to envoy's administration interface, in the format `http://127.0.0.1:9010`. If provided, `scuttle` will poll this url at `/server_info` waiting for envoy to report as `LIVE`. If provided and local (`127.0.0.1` or `localhost`), then envoy will be instructed to shut down if the application exits cleanly. |
-| `NEVER_KILL_ISTIO`    | If provided and set to `true`, `scuttle` will not instruct istio to exit under any circumstances.
-| `SCUTTLE_LOGGING`    | If provided and set to `true`, `scuttle` will log various steps to the console which is helpful for debugging |
-| `START_WITHOUT_ENVOY` | If provided and set to `true`, `scuttle` will not wait for envoy to be LIVE before starting the main application. However, it will still instruct envoy to exit.|
-| `ISTIO_QUIT_API` | If provided `scuttle` will send a POST to `/quitquitquit` at the given API.  Should be in format `http://127.0.0.1:15020`.  This is intended for Istio v1.3 and higher.  When not given, Istio will be stopped using a `pkill` command.
+| Variable                      | Purpose                                                                                                                                                                                                                                                                                                                                  |
+|-------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `ENVOY_ADMIN_API`             | This is the path to envoy's administration interface, in the format `http://127.0.0.1:9010`. If provided, `scuttle` will poll this url at `/server_info` waiting for envoy to report as `LIVE`. If provided and local (`127.0.0.1` or `localhost`), then envoy will be instructed to shut down if the application exits cleanly. |
+| `NEVER_KILL_ISTIO`            | If provided and set to `true`, `scuttle` will not instruct istio to exit under any circumstances.
+| `NEVER_KILL_ISTIO_ON_FAILURE` | If provided and set to `true`, `scuttle` will not instruct istio to exit if the main binary has exited with a non-zero exit code.
+| `SCUTTLE_LOGGING`             | If provided and set to `true`, `scuttle` will log various steps to the console which is helpful for debugging |
+| `START_WITHOUT_ENVOY`         | If provided and set to `true`, `scuttle` will not wait for envoy to be LIVE before starting the main application. However, it will still instruct envoy to exit.|
+| `ISTIO_QUIT_API`              | If provided `scuttle` will send a POST to `/quitquitquit` at the given API.  Should be in format `http://127.0.0.1:15020`.  This is intended for Istio v1.3 and higher.  When not given, Istio will be stopped using a `pkill` command.
 
 ## How Scuttle stops Istio
 

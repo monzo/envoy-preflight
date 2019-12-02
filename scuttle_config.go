@@ -12,6 +12,7 @@ type ScuttleConfig struct {
 	IstioQuitAPI       string
 	NeverKillIstio     bool
 	IstioFallbackPkill bool
+	NeverKillIstioOnFailure bool
 }
 
 func log(message string) {
@@ -30,6 +31,7 @@ func getConfig() ScuttleConfig {
 		IstioQuitAPI:       getStringFromEnv("ISTIO_QUIT_API", "", loggingEnabled),
 		NeverKillIstio:     getBoolFromEnv("NEVER_KILL_ISTIO", false, loggingEnabled),
 		IstioFallbackPkill: getBoolFromEnv("ISTIO_FALLBACK_PKILL", false, loggingEnabled),
+		NeverKillIstioOnFailure: getBoolFromEnv("NEVER_KILL_ISTIO_ON_FAILURE", false, loggingEnabled),
 	}
 
 	return config

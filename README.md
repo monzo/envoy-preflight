@@ -19,6 +19,7 @@ When the application exits, unless `NEVER_KILL_ISTIO_ON_FAILURE` has been set an
 | `SCUTTLE_LOGGING`             | If provided and set to `true`, `scuttle` will log various steps to the console which is helpful for debugging |
 | `START_WITHOUT_ENVOY`         | If provided and set to `true`, `scuttle` will not wait for envoy to be LIVE before starting the main application. However, it will still instruct envoy to exit.|
 | `ISTIO_QUIT_API`              | If provided `scuttle` will send a POST to `/quitquitquit` at the given API.  Should be in format `http://127.0.0.1:15020`.  This is intended for Istio v1.3 and higher.  When not given, Istio will be stopped using a `pkill` command.
+| `GENERIC_QUIT_ENDPOINTS`      | If provided `scuttle` will send a POST to the URL given.  Multiple URLs are supported and must be provided as a CSV string.  Should be in format `http://myendpoint.com` or `http://myendpoint.com,https://myotherendpoint.com`.  The status code response is logged (if logging is enabled) but is not used.  A 200 is treated the same as a 404 or 500. `GENERIC_QUIT_ENDPOINTS` is handled before Istio is stopped. |
 
 ## How Scuttle stops Istio
 

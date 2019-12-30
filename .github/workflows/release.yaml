@@ -13,6 +13,7 @@ jobs:
         run: |
           go get github.com/cenk/backoff
           go get github.com/monzo/typhon  
+          go test -test.timeout 30s 
           GOOS=linux GOARCH=amd64 go build -o build/linux/amd64/scuttle
 
       ################################################

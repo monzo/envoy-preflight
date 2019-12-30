@@ -41,14 +41,21 @@ func getConfig() ScuttleConfig {
 }
 
 func getStringArrayFromEnv(name string, defaultVal []string, logEnabled bool) []string {
-	userValCsv := os.Getenv(name)
+	userValCsv := strings.Trim(os.Getenv(name), " ")
+
+	if userValCsv == "" {
+		return defaultVal
+	}
+
 	if logEnabled {
 		log(fmt.Sprintf("%s: %s", name, userValCsv))
 	}
+
 	userValArray := strings.Split(userValCsv, ",")
 	if len(userValArray) == 0 {
 		return defaultVal
 	}
+
 	return userValArray
 }
 

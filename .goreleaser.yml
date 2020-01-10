@@ -1,0 +1,13 @@
+before:
+  hooks:
+  - go mod tidy
+
+env:
+- GO111MODULE=on
+
+builds:
+- binary: envoy-preflight
+  goos:
+  - linux
+  goarch:
+  - amd64

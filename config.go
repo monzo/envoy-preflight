@@ -26,17 +26,24 @@ func log(message string) {
 func getConfig() Config {
 	loggingEnabled := getBoolFromEnv("ENVOY_PREFLIGHT_LOGGING", true, false)
 
-	istioKillAPI := getStringFromEnv("ISTIO_KILL_API", "", false)
-	if istioKillAPI != "" {
-		log("Warning: don't use ISTIO_KILL_API but ISTIO_QUIT_API instead")
+	if getStringFromEnv("ENVOY_KILL_API", "", false) != "" {
+		log("Warning: don't use ENVOY_KILL_API but ISTIO_QUIT_API instead")
+	}
+
+	defaultEnvoyAdminAPI := ""
+	defaultIstioQuitAPI := ""
+
+	if getBoolFromEnv("USE_ISTIO_ENDPOINT", false, loggingEnabled) {
+		defaultEnvoyAdminAPI = "http://127.0.0.1:15000"
+		defaultIstioQuitAPI = "http://127.0.0.1:15020"
 	}
 
 	config := Config{
 		// Logging enabled by default, disabled if "false"
 		LoggingEnabled:          loggingEnabled,
-		EnvoyAdminAPI:           getStringFromEnv("ENVOY_ADMIN_API", "", loggingEnabled),
+		EnvoyAdminAPI:           getStringFromEnv("ENVOY_ADMIN_API", defaultEnvoyAdminAPI, loggingEnabled),
 		StartWithoutEnvoy:       getBoolFromEnv("START_WITHOUT_ENVOY", false, loggingEnabled),
-		IstioQuitAPI:            getStringFromEnv("ISTIO_QUIT_API", "", loggingEnabled),
+		IstioQuitAPI:            getStringFromEnv("ISTIO_QUIT_API", defaultIstioQuitAPI, loggingEnabled),
 		NeverKillIstio:          getBoolFromEnv("NEVER_KILL_ISTIO", false, loggingEnabled),
 		IstioFallbackPkill:      getBoolFromEnv("ISTIO_FALLBACK_PKILL", false, loggingEnabled),
 		NeverKillIstioOnFailure: getBoolFromEnv("NEVER_KILL_ISTIO_ON_FAILURE", false, loggingEnabled),

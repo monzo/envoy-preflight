@@ -3,6 +3,9 @@ language: go
 go:
 - 1.13
 
+script:
+- go test -timeout 30s
+
 deploy:
 - provider: script
   skip_cleanup: true

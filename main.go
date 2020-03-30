@@ -35,6 +35,7 @@ func main() {
 	if config.EnvoyAdminAPI != "" && config.StartWithoutEnvoy == false {
 		log("Blocking until envoy starts")
 		block()
+		log("Blocking finished, envoy has started")
 	}
 
 	if len(os.Args) < 2 {

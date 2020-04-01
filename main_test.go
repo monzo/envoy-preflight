@@ -103,9 +103,28 @@ func TestSlowEnvoy(t *testing.T) {
 // Tests generic quit endpoints are sent
 func TestGenericQuitEndpoints(t *testing.T) {
 	fmt.Println("Starting TestGenericQuitEndpoints")
-	os.Setenv("START_WITHOUT_ENVOY", "true")
-	// URLs dont matter, just need something that will generate an HTTP response
-	os.Setenv("GENERIC_QUIT_ENDPOINTS", " https://google.com/, https://github.com/ ")
-	envoyDelayTimestamp = time.Now().Unix()
-	initAndRun(1)
+	// Valid URLs dont matter, just need something that will generate an HTTP response
+	// 127.0.0.1:1111/idontexist is to verify we don't panic if a nonexistent URL is given
+	// notaurl^^ is to verify a malformatted URL does not result in panic
+	os.Setenv("GENERIC_QUIT_ENDPOINTS", "https://google.com/, https://github.com/, 127.0.0.1:1111/idontexist, notaurl^^ ")
+	initTestingEnv()
+	killGenericEndpoints()
+}
+
+// Tests scuttle does not fail when the /quitquitquit endpoint does not return a response
+func TestNoQuitQuitQuitResponse(t *testing.T) {
+	fmt.Println("Starting TestNoQuitQuitQuitResponse")
+	os.Setenv("START_WITHOUT_ENVOY", "false")
+	os.Setenv("ISTIO_QUIT_API", "127.0.0.1:1111/idontexist")
+	initTestingEnv()
+	killIstioWithAPI()
+}
+
+// Tests scuttle does not fail when the /quitquitquit endpoint is not a valid URL
+func TestNoQuitQuitQuitMalformattedUrl(t *testing.T) {
+	fmt.Println("Starting TestNoQuitQuitQuitResponse")
+	os.Setenv("START_WITHOUT_ENVOY", "false")
+	os.Setenv("ISTIO_QUIT_API", "notaurl^^")
+	initTestingEnv()
+	killIstioWithAPI()
 }

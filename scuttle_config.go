@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
 type ScuttleConfig struct {
 	LoggingEnabled          bool
 	EnvoyAdminAPI           string
 	StartWithoutEnvoy       bool
+	WaitForEnvoyTimeout     time.Duration
 	IstioQuitAPI            string
 	NeverKillIstio          bool
 	IstioFallbackPkill      bool
@@ -30,6 +32,7 @@ func getConfig() ScuttleConfig {
 		LoggingEnabled:          loggingEnabled,
 		EnvoyAdminAPI:           getStringFromEnv("ENVOY_ADMIN_API", "", loggingEnabled),
 		StartWithoutEnvoy:       getBoolFromEnv("START_WITHOUT_ENVOY", false, loggingEnabled),
+		WaitForEnvoyTimeout:     getDurationFromEnv("WAIT_FOR_ENVOY_TIMEOUT", time.Duration(0), loggingEnabled),
 		IstioQuitAPI:            getStringFromEnv("ISTIO_QUIT_API", "", loggingEnabled),
 		NeverKillIstio:          getBoolFromEnv("NEVER_KILL_ISTIO", false, loggingEnabled),
 		IstioFallbackPkill:      getBoolFromEnv("ISTIO_FALLBACK_PKILL", false, loggingEnabled),
@@ -90,4 +93,29 @@ func getBoolFromEnv(name string, defaultVal bool, logEnabled bool) bool {
 		log(fmt.Sprintf("%s: %s", name, userVal))
 	}
 	return (userVal == "true")
+}
+
+func getDurationFromEnv(name string, defaultVal time.Duration, logEnabled bool) time.Duration {
+	userVal := os.Getenv(name)
+
+	// User did not set anything, return default.
+	if userVal == "" {
+		return defaultVal
+	}
+
+	// User has set something, check it is valid.
+	if userVal != "" {
+		if duration, err := time.ParseDuration(userVal); err == nil {
+			// User gave valid option.
+			if logEnabled {
+				log(fmt.Sprintf("%s: %s", name, userVal))
+			}
+
+			return duration
+		} else if logEnabled {
+			log(fmt.Sprintf("%s: %s (Invalid value will be ignored)", name, userVal))
+		}
+	}
+
+	return defaultVal
 }

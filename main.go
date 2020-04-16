@@ -169,7 +169,7 @@ func block() {
 
 	b := backoff.NewExponentialBackOff()
 	// We wait forever for envoy to start. In practice k8s will kill the pod if we take too long.
-	b.MaxElapsedTime = 0
+	b.MaxElapsedTime = config.WaitForEnvoyTimeout
 
 	_ = backoff.Retry(func() error {
 		rsp := typhon.NewRequest(context.Background(), "GET", url, nil).Send().Response()

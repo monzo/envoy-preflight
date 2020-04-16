@@ -45,10 +45,12 @@ To enable this, you must add `shareProcessNamespace: true` to your **Pod** defin
 
 *Note:* This method is used by default if `ISTIO_QUIT_API` is not set
 
-## Example Dockerfile
+## Example usage in your Job's `Dockerfile`
 
 ```dockerfile
-FROM base AS final
+FROM python:latest
+# Below command makes scuttle available in path
+COPY --from=jacobsvante/scuttle:latest /scuttle /bin/scuttle
 WORKDIR /my-app
 COPY ["my-app/", "."]
 ENTRYPOINT ["scuttle", "dotnet", "test"]

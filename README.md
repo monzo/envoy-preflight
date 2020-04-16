@@ -51,9 +51,9 @@ To enable this, you must add `shareProcessNamespace: true` to your **Pod** defin
 FROM python:latest
 # Below command makes scuttle available in path
 COPY --from=jacobsvante/scuttle:latest /scuttle /bin/scuttle
-WORKDIR /my-app
-COPY ["my-app/", "."]
-ENTRYPOINT ["scuttle", "dotnet", "test"]
+WORKDIR /app
+COPY /app/ ./
+ENTRYPOINT ["scuttle", "python", "-m", "my_app"]
 ```
 
 ## Credits

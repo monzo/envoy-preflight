@@ -41,16 +41,16 @@ jobs:
           tags: latest,${{ steps.get_version.outputs.VERSION }}
           push: ${{ startsWith(github.ref, 'refs/tags/') }}
       # On tag, Pack zip of scuttle for GitHub Release
-      # - name: Pack
-      #   run: |
-      #     mkdir build/artifacts 
-      #     zip -r -j build/artifacts/scuttle-linux-amd64.zip build/linux/amd64/
-      #   if: startsWith(github.ref, 'refs/tags/')
+      - name: Pack
+        run: |
+          mkdir build/artifacts 
+          zip -r -j build/artifacts/scuttle-linux-amd64.zip build/linux/amd64/
+        if: startsWith(github.ref, 'refs/tags/')
       # On tag, Create GitHub Release
-      # - name: Release
-      #   uses: softprops/action-gh-release@v1
-      #   if: startsWith(github.ref, 'refs/tags/')
-      #   with:
-      #     files: build/artifacts/*.zip
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: build/artifacts/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

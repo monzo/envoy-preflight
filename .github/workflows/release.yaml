@@ -13,6 +13,8 @@ jobs:
         id: get_version
         run: |
           VERSION=${GITHUB_REF##*/v}
+          # If VERSION is empty set to local to avoid docker build -t from failing
+          if [[ -z "$VERSION" ]]; then VERSION="local"; fi
           echo ::set-output name=VERSION::$VERSION
         if: startsWith(github.ref, 'refs/tags/')
       # Build and test binary
@@ -31,10 +33,9 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USER }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
-          #repository: myorg/myrepository
+          repository: redboxoss/scuttle
           tags: latest,${{ steps.get_version.outputs.VERSION }}
-          #push: ${{ startsWith(github.ref, 'refs/tags/') }}
-          push: false 
+          push: ${{ startsWith(github.ref, 'refs/tags/') }}
       # On tag, Pack zip of scuttle for GitHub Release
       - name: Pack
         run: |

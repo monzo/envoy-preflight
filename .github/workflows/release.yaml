@@ -9,7 +9,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
       
-      - name: Build
+      - name: Test
         env:
           CGO_ENABLED: 0
         run: |

@@ -12,9 +12,13 @@ jobs:
       - name: Get tag version
         id: get_version
         run: |
-          VERSION=${GITHUB_REF##*/v}
-          # If VERSION is empty set to local to avoid docker build -t from failing
-          if [[ -z "$VERSION" ]]; then VERSION="local"; fi
+          if [[ $GITHUB_REF == "refs/tags/v"* ]]; then
+            echo "Found release tag"
+            VERSION=${GITHUB_REF/refs\/tags\/v}
+          else
+            echo "No release tag found"
+            VERSION="local-build-only"
+          fi
           echo "Using version: $VERSION"
           echo ::set-output name=VERSION::$VERSION
       # Build and test binary

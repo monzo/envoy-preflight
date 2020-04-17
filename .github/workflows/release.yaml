@@ -9,7 +9,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
       
-      - name: Test
+      - name: Build and Test Binary
         env:
           CGO_ENABLED: 0
         run: |
@@ -17,15 +17,24 @@ jobs:
           go get github.com/monzo/typhon  
           go test -test.timeout 30s 
           GOOS=linux GOARCH=amd64 go build -o build/linux/amd64/scuttle
-
-      ################################################
-      # Create Github release if this is a tag push
+      # Build Docker image
+      # On tag, push Docker image
+      - name: Build Docker Image
+        uses: docker/build-push-action@v1
+        with:
+          #username: ${{ secrets.DOCKER_USERNAME }}
+          #password: ${{ secrets.DOCKER_PASSWORD }}
+          #repository: myorg/myrepository
+          tag_with_ref: true
+          #push: ${{ startsWith(github.ref, 'refs/tags/') }}
+          push: false 
+      # On tag, Pack zip of scuttle for GitHub Release
       - name: Pack
         run: |
           mkdir build/artifacts 
           zip -r -j build/artifacts/scuttle-linux-amd64.zip build/linux/amd64/
         if: startsWith(github.ref, 'refs/tags/')
-     
+      # On tag, Create GitHub Release
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')

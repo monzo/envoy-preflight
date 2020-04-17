@@ -29,8 +29,8 @@ jobs:
       - name: Build Docker Image
         uses: docker/build-push-action@v1
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_USER }}
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
           #repository: myorg/myrepository
           tags: latest,${{ steps.get_version.outputs.VERSION }}
           #push: ${{ startsWith(github.ref, 'refs/tags/') }}

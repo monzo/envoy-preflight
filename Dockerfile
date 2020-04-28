@@ -15,3 +15,5 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-w' -i -o 
 FROM golang:1.13.4-alpine
 
 COPY --from=builder /go/bin/envoy-preflight /go/bin/envoy-preflight
+
+ENTRYPOINT /go/bin/envoy-preflight

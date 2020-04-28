@@ -16,4 +16,4 @@ FROM gcr.io/distroless/base-debian10
 
 COPY --from=builder /go/bin/envoy-preflight /go/bin/envoy-preflight
 
-ENTRYPOINT /go/bin/envoy-preflight
+ENTRYPOINT ["/go/bin/envoy-preflight"]

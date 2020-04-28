@@ -12,7 +12,7 @@ RUN dep ensure
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-w' -i -o /go/bin/envoy-preflight ./main.go
 
-FROM golang:1.13.4-alpine
+FROM gcr.io/distroless/base-debian10
 
 COPY --from=builder /go/bin/envoy-preflight /go/bin/envoy-preflight
 

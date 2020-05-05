@@ -21,6 +21,7 @@ When the application exits, unless `NEVER_KILL_ISTIO_ON_FAILURE` has been set an
 | `WAIT_FOR_ENVOY_TIMEOUT`      | If provided and set to a valid `time.Duration` string greater than 0 seconds, `scuttle` will wait for that amount of time before starting the main application. By default, it will wait indefinitely.|
 | `ISTIO_QUIT_API`              | If provided `scuttle` will send a POST to `/quitquitquit` at the given API.  Should be in format `http://127.0.0.1:15020`.  This is intended for Istio v1.3 and higher.  When not given, Istio will be stopped using a `pkill` command.
 | `GENERIC_QUIT_ENDPOINTS`      | If provided `scuttle` will send a POST to the URL given.  Multiple URLs are supported and must be provided as a CSV string.  Should be in format `http://myendpoint.com` or `http://myendpoint.com,https://myotherendpoint.com`.  The status code response is logged (if logging is enabled) but is not used.  A 200 is treated the same as a 404 or 500. `GENERIC_QUIT_ENDPOINTS` is handled before Istio is stopped. |
+| `QUIT_WITHOUT_ENVOY_TIMEOUT`  | If provided and set to a valid duration, `scuttle` will exit if Envoy does not become available before the end of the timeout. If `START_WITHOUT_ENVOY` is also set, this variable will not be taken into account |
 
 ## How Scuttle stops Istio
 

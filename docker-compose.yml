@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  scuttle:
+    build:
+      context: .
+      dockerfile: "./docker/alpine/Dockerfile"
+    command:
+      - /bin/sh
+      - -c
+      - |
+          for i in `seq 10`
+          do
+            echo executing
+            sleep 1
+          done
+    environment:
+      ENVOY_ADMIN_API: "http://envoy:9901"
+      ISTIO_QUIT_API: "http://envoy:15020"
+    networks:
+      - scuttle
+  envoy:
+    image: envoyproxy/envoy:v1.13.1
+    networks:
+      - scuttle
+    ports:
+      - 80
+      - 443
+      - 15000
+    volumes:
+    - ./docker/envoy.yaml:/etc/envoy/envoy.yaml
+
+networks:
+  scuttle:
+    name: "scuttle"

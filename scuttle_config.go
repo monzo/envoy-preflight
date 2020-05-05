@@ -17,6 +17,7 @@ type ScuttleConfig struct {
 	IstioFallbackPkill      bool
 	NeverKillIstioOnFailure bool
 	GenericQuitEndpoints    []string
+	QuitWithoutEnvoyTimeout	time.Duration
 }
 
 func log(message string) {
@@ -38,6 +39,7 @@ func getConfig() ScuttleConfig {
 		IstioFallbackPkill:      getBoolFromEnv("ISTIO_FALLBACK_PKILL", false, loggingEnabled),
 		NeverKillIstioOnFailure: getBoolFromEnv("NEVER_KILL_ISTIO_ON_FAILURE", false, loggingEnabled),
 		GenericQuitEndpoints:    getStringArrayFromEnv("GENERIC_QUIT_ENDPOINTS", make([]string, 0), loggingEnabled),
+		QuitWithoutEnvoyTimeout: getDurationFromEnv("QUIT_WITHOUT_ENVOY_TIMEOUT", time.Duration(0), loggingEnabled),
 	}
 
 	return config

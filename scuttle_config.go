@@ -21,7 +21,7 @@ type ScuttleConfig struct {
 
 func log(message string) {
 	if config.LoggingEnabled {
-		fmt.Println("scuttle: " + message)
+		fmt.Printf("%s scuttle: %s\n", time.Now().UTC().Format("2006-01-02T15:04:05Z"), message)
 	}
 }
 
@@ -92,7 +92,7 @@ func getBoolFromEnv(name string, defaultVal bool, logEnabled bool) bool {
 	if logEnabled {
 		log(fmt.Sprintf("%s: %s", name, userVal))
 	}
-	return (userVal == "true")
+	return userVal == "true"
 }
 
 func getDurationFromEnv(name string, defaultVal time.Duration, logEnabled bool) time.Duration {

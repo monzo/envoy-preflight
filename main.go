@@ -13,8 +13,6 @@ import (
 	"github.com/monzo/typhon"
 )
 
-var loggingEnabled = false
-
 type ServerInfo struct {
 	State string `json:"state"`
 }

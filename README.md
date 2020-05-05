@@ -29,7 +29,7 @@ Scuttle has two methods to stop Istio.  You should configure Scuttle appropriate
 | Istio Version | Method |
 |---------------|--------|
 | 1.3 and higher| `/quitquitquit` endpoint |
-| 1.2 and lower | `pkill` command
+| 1.2 and lower | `pkill` command |
 
 ### 1.3 and higher
 

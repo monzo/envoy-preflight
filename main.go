@@ -1,3 +1,4 @@
+// Binary scuttle ...
 package main
 
 import (
@@ -14,6 +15,7 @@ import (
 	"github.com/monzo/typhon"
 )
 
+// ServerInfo ... represents the response from Envoy's server info endpoint
 type ServerInfo struct {
 	State string `json:"state"`
 }

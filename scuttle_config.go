@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// ScuttleConfig ... represents Scuttle's configuration based on environment variables or defaults.
 type ScuttleConfig struct {
 	LoggingEnabled          bool
 	EnvoyAdminAPI           string
@@ -17,7 +18,7 @@ type ScuttleConfig struct {
 	IstioFallbackPkill      bool
 	NeverKillIstioOnFailure bool
 	GenericQuitEndpoints    []string
-	QuitWithoutEnvoyTimeout	time.Duration
+	QuitWithoutEnvoyTimeout time.Duration
 }
 
 func log(message string) {

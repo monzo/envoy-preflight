@@ -134,7 +134,7 @@ func TestNoQuitQuitQuitResponse(t *testing.T) {
 
 // Tests scuttle does not fail when the /quitquitquit endpoint is not a valid URL
 func TestNoQuitQuitQuitMalformedUrl(t *testing.T) {
-	fmt.Println("Starting TestNoQuitQuitQuitMalformattedUrl")
+	fmt.Println("Starting TestNoQuitQuitQuitMalformedUrl")
 	os.Setenv("START_WITHOUT_ENVOY", "false")
 	os.Setenv("ISTIO_QUIT_API", "notaurl^^")
 	initTestingEnv()

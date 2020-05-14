@@ -24,6 +24,9 @@ jobs:
       with:
         fetch-depth: 1
         path: go/src/github.com/monzo/envoy-preflight
+        
+    - name: Create bin
+      run: mkdir -p ${{ github.workspace }}/go/bin
 
     - name: Get dependencies
       working-directory: go/src/github.com/monzo/envoy-preflight

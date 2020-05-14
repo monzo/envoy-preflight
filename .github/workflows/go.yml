@@ -38,4 +38,6 @@ jobs:
 
     - name: Build
       working-directory: go/src/github.com/monzo/envoy-preflight
+      env:
+        GOPATH: $GITHUB_WORKSPACE/go
       run: go build -v .

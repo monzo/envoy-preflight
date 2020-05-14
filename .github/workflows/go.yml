@@ -44,3 +44,13 @@ jobs:
       env:
         GOPATH: ${{ github.workspace }}/go
       run: go build -v .
+    
+    - name: Move binary
+      run: cp ${{ github.workspace }}/go/src/github.com/monzo/envoy-preflight/envoy-preflight ${{ github.workspace }}
+      
+    - name: Release binary
+      uses: skx/github-action-publish-binaries@release-0.14
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        args: 'envoy-preflight'

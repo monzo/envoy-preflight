@@ -28,7 +28,7 @@ jobs:
     - name: Get dependencies
       working-directory: go/src/github.com/monzo/envoy-preflight
       env:
-        GOPATH: $GITHUB_WORKSPACE/go
+        GOPATH: ${{env.GITHUB_WORKSPACE}}/go
       run: |
         go get -v -t -d ./...
         if [ -f Gopkg.toml ]; then
@@ -39,5 +39,5 @@ jobs:
     - name: Build
       working-directory: go/src/github.com/monzo/envoy-preflight
       env:
-        GOPATH: $GITHUB_WORKSPACE/go
+        GOPATH: ${{env.GITHUB_WORKSPACE}}/go
       run: go build -v .

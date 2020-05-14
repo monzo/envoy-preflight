@@ -36,7 +36,7 @@ jobs:
         go get -v -t -d ./...
         if [ -f Gopkg.toml ]; then
             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-            dep ensure
+            ${{ github.workspace }}/go/bin/dep ensure
         fi
 
     - name: Build

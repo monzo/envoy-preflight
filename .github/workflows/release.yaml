@@ -29,7 +29,7 @@ jobs:
           go get github.com/cenk/backoff
           go get github.com/monzo/typhon  
           go test -test.timeout 30s 
-          GOOS=linux GOARCH=amd64 go build -o build/linux/amd64/scuttle
+          GOOS=linux GOARCH=amd64 go build -o build/linux/amd64/scuttle -ldflags="-X 'main.Version=${{ steps.get_version.outputs.VERSION }}'"
       # Build Docker image
       # On tag, push Docker image
       - name: Build Docker Image
@@ -40,6 +40,7 @@ jobs:
           repository: redboxoss/scuttle
           tags: latest,${{ steps.get_version.outputs.VERSION }}
           push: ${{ startsWith(github.ref, 'refs/tags/') }}
+          build_args: VERSION=${{ steps.get_version.outputs.VERSION }}
       # On tag, Pack zip of scuttle for GitHub Release
       - name: Pack
         run: |

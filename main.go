@@ -20,12 +20,17 @@ type ServerInfo struct {
 	State string `json:"state"`
 }
 
+// Version ... Version of the binary, set to value like v1.0.0 in CI using ldflags
+var Version = "vlocal"
+
 var (
 	config ScuttleConfig
 )
 
 func main() {
 	config = getConfig()
+
+	log(fmt.Sprintf("Scuttle %s starting up", Version))
 
 	if len(os.Args) < 2 {
 		log("No arguments received, exiting")

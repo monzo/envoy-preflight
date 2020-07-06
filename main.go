@@ -75,7 +75,7 @@ func main() {
 			if proc == nil {
 				// Signal received before the process even started. Let's just exit.
 				log(fmt.Sprintf("Received signal '%v', exiting", sig))
-				os.Exit(1)
+				kill(1) // Attempt to stop sidecars if configured
 			} else {
 				// Proc is not null, so the child process is running and should also receive this signal
 				log(fmt.Sprintf("Received signal '%v', passing to child", sig))

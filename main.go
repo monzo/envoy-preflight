@@ -66,8 +66,7 @@ func main() {
 	var proc *os.Process
 
 	// Pass signals to the child process
-	// This takes os signal 2 (standard error)
-	// and passes those signals to the child process scuttle starts (proc)
+	// This takes an OS signal and passes to the child process scuttle starts (proc)
 	go func() {
 		stop := make(chan os.Signal, 2)
 		signal.Notify(stop)

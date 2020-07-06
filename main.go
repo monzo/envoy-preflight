@@ -30,7 +30,7 @@ var (
 func main() {
 	config = getConfig()
 
-	log(fmt.Sprintf("Scuttle %s starting up", Version))
+	log(fmt.Sprintf("Scuttle %s starting up, pid %d", Version, os.Getpid()))
 
 	if len(os.Args) < 2 {
 		log("No arguments received, exiting")
@@ -66,16 +66,20 @@ func main() {
 	var proc *os.Process
 
 	// Pass signals to the child process
+	// This takes os signal 2 (standard error)
+	// and passes those signals to the child process scuttle starts (proc)
 	go func() {
 		stop := make(chan os.Signal, 2)
 		signal.Notify(stop)
 		for sig := range stop {
-			if proc != nil {
-				proc.Signal(sig)
-			} else {
+			if proc == nil {
 				// Signal received before the process even started. Let's just exit.
-				log("Received exit signal, exiting")
+				log(fmt.Sprintf("Received signal '%v', exiting", sig))
 				os.Exit(1)
+			} else {
+				// Proc is not null, so the child process is running and should also receive this signal
+				log(fmt.Sprintf("Received signal '%v', passing to child", sig))
+				proc.Signal(sig)
 			}
 		}
 	}()
@@ -104,15 +108,15 @@ func kill(exitCode int) {
 	switch {
 	case config.EnvoyAdminAPI == "":
 		// We don't have an ENVOY_ADMIN_API env var, do nothing
-		log("No ENVOY_ADMIN_API, doing nothing")
+		log("kill called, No ENVOY_ADMIN_API, doing nothing")
 	case !strings.Contains(config.EnvoyAdminAPI, "127.0.0.1") && !strings.Contains(config.EnvoyAdminAPI, "localhost"):
 		// Envoy is not local; do nothing
-		log("ENVOY_ADMIN_API is not localhost or 127.0.0.1, doing nothing")
+		log("kill called, ENVOY_ADMIN_API is not localhost or 127.0.0.1, doing nothing")
 	case config.NeverKillIstio:
 		// We're configured never to kill envoy, do nothing
-		log("NEVER_KILL_ISTIO is true, doing nothing")
+		log("kill called, NEVER_KILL_ISTIO is true, doing nothing")
 	case config.NeverKillIstioOnFailure && exitCode != 0:
-		log("NEVER_KILL_ISTIO_ON_FAILURE is true, exiting without killing Istio")
+		log("kill called, NEVER_KILL_ISTIO_ON_FAILURE is true, exiting without killing Istio")
 		os.Exit(exitCode)
 	case config.IstioQuitAPI == "":
 		// No istio API sent, fallback to Pkill method

@@ -104,25 +104,25 @@ func main() {
 }
 
 func kill(exitCode int) {
+	var logLineUnformatted = "Kill received: (Action: %s, Reason: %s, Exit Code: %d)"
 	switch {
 	case config.EnvoyAdminAPI == "":
-		// We don't have an ENVOY_ADMIN_API env var, do nothing
-		log("kill called, No ENVOY_ADMIN_API, doing nothing")
+		log(fmt.Sprintf(logLineUnformatted, "Doing nothing", "ENVOY_ADMIN_API not set", exitCode))
 	case !strings.Contains(config.EnvoyAdminAPI, "127.0.0.1") && !strings.Contains(config.EnvoyAdminAPI, "localhost"):
-		// Envoy is not local; do nothing
-		log("kill called, ENVOY_ADMIN_API is not localhost or 127.0.0.1, doing nothing")
+		log(fmt.Sprintf(logLineUnformatted, "Doing nothing", "ENVOY_ADMIN_API is not a localhost or 127.0.0.1", exitCode))
 	case config.NeverKillIstio:
-		// We're configured never to kill envoy, do nothing
-		log("kill called, NEVER_KILL_ISTIO is true, doing nothing")
+		log(fmt.Sprintf(logLineUnformatted, "Doing nothing", "NEVER_KILL_ISTIO is true", exitCode))
 	case config.NeverKillIstioOnFailure && exitCode != 0:
-		log("kill called, NEVER_KILL_ISTIO_ON_FAILURE is true, exiting without killing Istio")
+		log(fmt.Sprintf(logLineUnformatted, "Doing nothing", "NEVER_KILL_ISTIO_ON_FAILURE is true with", exitCode))
 		os.Exit(exitCode)
 	case config.IstioQuitAPI == "":
 		// No istio API sent, fallback to Pkill method
+		log(fmt.Sprintf(logLineUnformatted, "Stopping Istio with pkill", "ISTIO_QUIT_API is not set", exitCode))
 		killGenericEndpoints()
 		killIstioWithPkill()
 	default:
 		// Stop istio using api
+		log(fmt.Sprintf(logLineUnformatted, "Stopping Istio with API", "ISTIO_QUIT_API is set", exitCode))
 		killGenericEndpoints()
 		killIstioWithAPI()
 	}

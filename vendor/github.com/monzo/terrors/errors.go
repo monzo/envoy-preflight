@@ -253,8 +253,12 @@ func (p *Error) Matches(match string) bool {
 }
 
 // PrefixMatches returns whether the string returned from error.Error() starts with the given param string. This means
-// you can match the error on different levels e.g. dotted codes `bad_request` or `bad_request.missing_param`.
-func (p *Error) PrefixMatches(prefix string) bool {
+// you can match the error on different levels e.g. dotted codes `bad_request` or `bad_request.missing_param`. Each
+// dotted part can be passed as a separate argument e.g. `terr.PrefixMatches(terrors.ErrBadRequest, "missing_param")`
+// is the same as `terr.PrefixMatches("bad_request.missing_param")`
+func (p *Error) PrefixMatches(prefixParts ...string) bool {
+	prefix := strings.Join(prefixParts, ".")
+
 	return strings.HasPrefix(p.Code, prefix)
 }
 
@@ -271,10 +275,12 @@ func Matches(err error, match string) bool {
 
 // PrefixMatches returns true if the error is a terror and the string returned from error.Error() starts with the
 // given param string. This means you can match the error on different levels e.g. dotted codes `bad_request` or
-// `bad_request.missing_param`.
-func PrefixMatches(err error, prefix string) bool {
+// `bad_request.missing_param`. Each dotted part can be passed as a separate argument
+// e.g. `terrors.PrefixMatches(terr, terrors.ErrBadRequest, "missing_param")` is the same as
+// terrors.PrefixMatches(terr, "bad_request.missing_param")`
+func PrefixMatches(err error, prefixParts ...string) bool {
 	if terr, ok := Wrap(err, nil).(*Error); ok {
-		return terr.PrefixMatches(prefix)
+		return terr.PrefixMatches(prefixParts...)
 	}
 
 	return false

@@ -26,8 +26,7 @@ jobs:
         env:
           CGO_ENABLED: 0
         run: |
-          go get github.com/cenk/backoff
-          go get github.com/monzo/typhon  
+          go mod download
           go test -test.timeout 30s 
           GOOS=linux GOARCH=amd64 go build -o build/linux/amd64/scuttle -ldflags="-X 'main.Version=${{ steps.get_version.outputs.VERSION }}'"
       # Build Docker image

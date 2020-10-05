@@ -50,7 +50,7 @@ func main() {
 			if err == nil || errors.Is(err, context.Canceled) {
 				log("Blocking finished, Envoy has started")
 			} else if errors.Is(err, context.DeadlineExceeded) {
-				log("timeout reached while waiting for Envoy to start")
+				log("Blocking timeout reached and Envoy has not started")
 			} else {
 				panic(err.Error())
 			}

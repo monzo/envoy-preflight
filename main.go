@@ -196,22 +196,25 @@ func waitForEnvoy() context.Context {
 
 func pollEnvoy(ctx context.Context, cancel context.CancelFunc) {
 	url := fmt.Sprintf("%s/server_info", config.EnvoyAdminAPI)
-
+	pollCount := 0
 	b := backoff.NewExponentialBackOff()
 	// We wait forever for envoy to start. In practice k8s will kill the pod if we take too long.
 	b.MaxElapsedTime = config.WaitForEnvoyTimeout
 
 	_ = backoff.Retry(func() error {
+		pollCount++
 		rsp := typhon.NewRequest(ctx, "GET", url, nil).Send().Response()
 
 		info := &ServerInfo{}
 
 		err := rsp.Decode(info)
 		if err != nil {
+			log(fmt.Sprintf("Polling Envoy (%d), error: %s", pollCount, err))
 			return err
 		}
 
 		if info.State != "LIVE" {
+			log(fmt.Sprintf("Polling Envoy (%d), status: Not ready yet", pollCount))
 			return errors.New("not live yet")
 		}
 

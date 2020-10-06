@@ -161,3 +161,21 @@ func TestWaitTillTimeoutForEnvoy(t *testing.T) {
 		}
 	}
 }
+
+// Tests scuttle will continue after WAIT_FOR_ENVOY_TIMEOUT expires and enovy is not ready
+func TestWaitForEnvoyTimeoutContinueWithoutEnvoy(t *testing.T) {
+	fmt.Println("Starting TestWaitForEnvoyTimeoutContinueWithoutEnvoy")
+	os.Setenv("WAIT_FOR_ENVOY_TIMEOUT", "5s")
+	os.Setenv("ENVOY_ADMIN_API", badServer.URL)
+	initTestingEnv()
+	blockingCtx := waitForEnvoy()
+	<-blockingCtx.Done()
+	err := blockingCtx.Err()
+	if err == nil || !errors.Is(err, context.DeadlineExceeded) {
+		fmt.Println("TestWaitForEnvoyTimeoutContinueWithoutEnvoy err", err)
+		// Err is nil (enovy is up)
+		// or Err is set, but is not a cancellation err
+		// we expect a cancellation when the time is up
+		t.Fail()
+	}
+}

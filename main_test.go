@@ -146,6 +146,7 @@ func TestWaitTillTimeoutForEnvoy(t *testing.T) {
 	fmt.Println("Starting TestWaitTillTimeoutForEnvoy")
 	os.Setenv("QUIT_WITHOUT_ENVOY_TIMEOUT", "500ms")
 	os.Setenv("ENVOY_ADMIN_API", badServer.URL)
+	initTestingEnv()
 	dur, _ := time.ParseDuration("500ms")
 	config.QuitWithoutEnvoyTimeout = dur
 	blockingCtx := waitForEnvoy()
@@ -156,13 +157,13 @@ func TestWaitTillTimeoutForEnvoy(t *testing.T) {
 	case <-time.After(1 * time.Second):
 		t.Fatal("Context did not timeout")
 	case <-blockingCtx.Done():
-		if !errors.Is(blockingCtx.Err(), context.Canceled) {
+		if !errors.Is(blockingCtx.Err(), context.DeadlineExceeded) {
 			t.Fatalf("Context contains wrong error: %s", blockingCtx.Err())
 		}
 	}
 }
 
-// Tests scuttle will continue after WAIT_FOR_ENVOY_TIMEOUT expires and enovy is not ready
+// Tests scuttle will continue after WAIT_FOR_ENVOY_TIMEOUT expires and envoy is not ready
 func TestWaitForEnvoyTimeoutContinueWithoutEnvoy(t *testing.T) {
 	fmt.Println("Starting TestWaitForEnvoyTimeoutContinueWithoutEnvoy")
 	os.Setenv("WAIT_FOR_ENVOY_TIMEOUT", "5s")
@@ -173,7 +174,7 @@ func TestWaitForEnvoyTimeoutContinueWithoutEnvoy(t *testing.T) {
 	err := blockingCtx.Err()
 	if err == nil || !errors.Is(err, context.DeadlineExceeded) {
 		fmt.Println("TestWaitForEnvoyTimeoutContinueWithoutEnvoy err", err)
-		// Err is nil (enovy is up)
+		// Err is nil (envoy is up)
 		// or Err is set, but is not a cancellation err
 		// we expect a cancellation when the time is up
 		t.Fail()

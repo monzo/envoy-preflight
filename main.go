@@ -49,8 +49,11 @@ func main() {
 			err := blockingCtx.Err()
 			if err == nil || errors.Is(err, context.Canceled) {
 				log("Blocking finished, Envoy has started")
+			} else if errors.Is(err, context.DeadlineExceeded) && config.QuitWithoutEnvoyTimeout > time.Duration(0) {
+				log("Blocking timeout reached and Envoy has not started, exiting scuttle")
+				os.Exit(1)
 			} else if errors.Is(err, context.DeadlineExceeded) {
-				log("Blocking timeout reached and Envoy has not started")
+				log("Blocking timeout reached and Envoy has not started, continuing with passed in executable")
 			} else {
 				panic(err.Error())
 			}
@@ -183,7 +186,9 @@ func waitForEnvoy() context.Context {
 	}
 	var blockingCtx context.Context
 	var cancel context.CancelFunc
-	if config.WaitForEnvoyTimeout > time.Duration(0) {
+	if config.QuitWithoutEnvoyTimeout > time.Duration(0) {
+		blockingCtx, cancel = context.WithTimeout(context.Background(), config.QuitWithoutEnvoyTimeout)
+	} else if config.WaitForEnvoyTimeout > time.Duration(0) {
 		blockingCtx, cancel = context.WithTimeout(context.Background(), config.WaitForEnvoyTimeout)
 	} else {
 		blockingCtx, cancel = context.WithCancel(context.Background())
@@ -200,6 +205,10 @@ func pollEnvoy(ctx context.Context, cancel context.CancelFunc) {
 	b := backoff.NewExponentialBackOff()
 	// We wait forever for envoy to start. In practice k8s will kill the pod if we take too long.
 	b.MaxElapsedTime = config.WaitForEnvoyTimeout
+
+	if config.QuitWithoutEnvoyTimeout > time.Duration(0) {
+		b.MaxElapsedTime = config.QuitWithoutEnvoyTimeout
+	}
 
 	_ = backoff.Retry(func() error {
 		pollCount++

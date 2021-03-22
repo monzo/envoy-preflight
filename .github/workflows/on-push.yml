@@ -1,0 +1,56 @@
+name: Build on Test branches
+
+on:
+  push:
+    branches:
+      - test/*
+
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.13
+      id: go
+
+    - name: Check out code into GOPATH
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+        path: go/src/github.com/primeroz/envoy-preflight
+        
+    - name: Create bin
+      run: mkdir -p ${{ github.workspace }}/go/bin
+
+    - name: Get dependencies
+      working-directory: go/src/github.com/primeroz/envoy-preflight
+      env:
+        GOPATH: ${{ github.workspace	}}/go
+        GO111MODULE: off
+      run: |
+        go get -v -t -d ./...
+        if [ -f Gopkg.toml ]; then
+            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+            ${{ github.workspace }}/go/bin/dep ensure
+        fi
+
+    - name: Build
+      working-directory: go/src/github.com/primeroz/envoy-preflight
+      env:
+        GOPATH: ${{ github.workspace }}/go
+      run: go build -v .
+    
+    - name: Move binary
+      run: cp ${{ github.workspace }}/go/src/github.com/primeroz/envoy-preflight/envoy-preflight ${{ github.workspace }}
+      
+    - name: Release binary
+      uses: skx/github-action-publish-binaries@release-0.14
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        args: 'envoy-preflight'

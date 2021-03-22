@@ -117,11 +117,12 @@ func checkEnvoyIstioSDS(host string) error {
 		return err
 	}
 
-	// Check number of CERTS is > 1, if not hit the KILL Endpoint
-	if len(certs.Certificates) == 1 {
+	// Check number of CERTS is 1 or 0, if it is hit the KILL Endpoint
+	if len(certs.Certificates) < 2 {
 		// Proper logging! with timestamp
 		fmt.Println("Only 1 certificate found in :15000/certs, killing envoy pod")
 		_ = typhon.NewRequest(context.Background(), "POST", fmt.Sprintf("%s/quitquitquit", host), nil).Send().Response()
+		return errors.New("Envoy Istio SDS check failed, Envoy proxy restarted")
 	}
 
 	return nil
@@ -159,7 +160,6 @@ func block(host string) {
 			if err != nil {
 				return err
 			}
-			return errors.New("Envoy Istio SDS check failed")
 		}
 
 		return nil

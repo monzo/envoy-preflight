@@ -119,6 +119,8 @@ func checkEnvoyIstioSDS(host string) error {
 
 	// Check number of CERTS is > 1, if not hit the KILL Endpoint
 	if len(certs.Certificates) == 1 {
+		// Proper logging! with timestamp
+		fmt.Println("Only 1 certificate found in :15000/certs, killing envoy pod")
 		_ = typhon.NewRequest(context.Background(), "POST", fmt.Sprintf("%s/quitquitquit", host), nil).Send().Response()
 	}
 

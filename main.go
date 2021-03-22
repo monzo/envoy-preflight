@@ -159,6 +159,7 @@ func block(host string) {
 			if err != nil {
 				return err
 			}
+			return errors.New("Envoy Istio SDS check failed")
 		}
 
 		return nil

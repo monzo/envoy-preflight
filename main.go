@@ -110,7 +110,7 @@ func checkEnvoyIstioSDS(host string) error {
 
 	rsp := typhon.NewRequest(context.Background(), "GET", url, nil).Send().Response()
 
-	certs := &ServerInfo{}
+	certs := &Certificates{}
 
 	err := rsp.Decode(certs)
 	if err != nil {
@@ -121,6 +121,8 @@ func checkEnvoyIstioSDS(host string) error {
 	if len(certs.Certificates) == 1 {
 		_ = typhon.NewRequest(context.Background(), "POST", fmt.Sprintf("%s/quitquitquit", host), nil).Send().Response()
 	}
+
+	return nil
 }
 
 func block(host string) {
@@ -148,14 +150,15 @@ func block(host string) {
 			return errors.New("not live yet")
 		}
 
+		// If Enabled perform the ENVOY ISTIO SDS WARMING Check
 		sdsprotection, ok := os.LookupEnv("ENVOY_ISTIO_SDS_WARMING_PROTECTION")
 		if ok && sdsprotection == "true" {
 			err := checkEnvoyIstioSDS(host)
 			if err != nil {
 				return err
 			}
-		} else {
-			return nil
 		}
+
+		return nil
 	}, b)
 }

@@ -31,7 +31,6 @@ jobs:
       working-directory: go/src/github.com/primeroz/envoy-preflight
       env:
         GOPATH: ${{ github.workspace	}}/go
-        GO111MODULE: off
       run: |
         go get -v -t -d ./...
         if [ -f Gopkg.toml ]; then

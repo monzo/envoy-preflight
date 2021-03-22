@@ -13,6 +13,25 @@ import (
 	"github.com/monzo/typhon"
 )
 
+// Structs to Check on Certificates from certs store
+type CertSpec struct {
+	path                string              `json:"path"`
+	serialNumber        string              `json:"serial_number"`
+	subjectAltNames     []map[string]string `json:"subject_alt_names"`
+	daysUntilExpiration string              `json:"days_until_expiration"`
+	validFrom           string              `json:"valid_from"`
+	expirationTime      string              `json:"expiration_time"`
+}
+
+type Certificate struct {
+	caCert    []CertSpec `json:"ca_cert"`
+	certChain []CertSpec `json:"cert_chain"`
+}
+
+type Certificates struct {
+	Certificates []Certificate `json:"certificates"`
+}
+
 type ServerInfo struct {
 	State string `json:"state"`
 }
@@ -83,6 +102,27 @@ func main() {
 	os.Exit(exitCode)
 }
 
+// Check status of SDS secrets from Istio to make sure SDS bootstrap was successful
+// This SDS data is populated at bootstrap Before the actual xDS connections are established so it should be safe to
+// just kill the envoy pod qith `quitquitquit` if we are in a bad state here
+func checkEnvoyIstioSDS(host string) error {
+	url := fmt.Sprintf("%s/certs", host)
+
+	rsp := typhon.NewRequest(context.Background(), "GET", url, nil).Send().Response()
+
+	certs := &ServerInfo{}
+
+	err := rsp.Decode(certs)
+	if err != nil {
+		return err
+	}
+
+	// Check number of CERTS is > 1, if not hit the KILL Endpoint
+	if len(certs.Certificates) == 1 {
+		_ = typhon.NewRequest(context.Background(), "POST", fmt.Sprintf("%s/quitquitquit", host), nil).Send().Response()
+	}
+}
+
 func block(host string) {
 	if os.Getenv("START_WITHOUT_ENVOY") == "true" {
 		return
@@ -108,6 +148,14 @@ func block(host string) {
 			return errors.New("not live yet")
 		}
 
-		return nil
+		sdsprotection, ok := os.LookupEnv("ENVOY_ISTIO_SDS_WARMING_PROTECTION")
+		if ok && sdsprotection == "true" {
+			err := checkEnvoyIstioSDS(host)
+			if err != nil {
+				return err
+			}
+		} else {
+			return nil
+		}
 	}, b)
 }

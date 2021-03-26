@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"strings"
 	"time"
+	"syscall"
 
 	"github.com/cenk/backoff"
 	"github.com/monzo/typhon"
@@ -67,12 +68,13 @@ func main() {
 	}
 
 	var proc *os.Process
-
+	stop := make(chan os.Signal, 2)
+	signal.Notify(stop, syscall.SIGINT) // Only listen to SIGINT until after child proc starts
+	
 	// Pass signals to the child process
 	// This takes an OS signal and passes to the child process scuttle starts (proc)
 	go func() {
-		stop := make(chan os.Signal, 2)
-		signal.Notify(stop)
+		
 		for sig := range stop {
 			if proc == nil {
 				// Signal received before the process even started. Let's just exit.
@@ -93,6 +95,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	// Once child process starts, listen for any symbol and pass to the child proc
+	signal.Notify(stop)
 
 	state, err := proc.Wait()
 	if err != nil {

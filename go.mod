@@ -1,6 +1,6 @@
 module github.com/blablacar/envoy-preflight
 
-go 1.12
+go 1.13
 
 require (
 	github.com/cenk/backoff v2.1.1+incompatible

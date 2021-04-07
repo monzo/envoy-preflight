@@ -76,7 +76,11 @@ func main() {
 	go func() {
 		
 		for sig := range stop {
-			if proc == nil {
+			if sig == syscall.SIGURG {
+				// SIGURG is used by Golang for it's own purposes, ignore it as these signals
+				// are most likely "junk" from Golang not from K8s/Docker
+				log(fmt.Sprintf("Received signal '%v', ignoring", sig))
+			} else if proc == nil {
 				// Signal received before the process even started. Let's just exit.
 				log(fmt.Sprintf("Received signal '%v', exiting", sig))
 				kill(1) // Attempt to stop sidecars if configured

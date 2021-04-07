@@ -3,5 +3,10 @@
 # Helpful when testing signal handling
 # use:
 #       ./scuttle /bin/bash scripts/self_destruct.sh
-kill -INT $(pidof scuttle)
+scuttle_pid=$(pidof scuttle)
+echo "------ Sending SIGURG, should be ignored ------ "
+kill -URG $scuttle_pid
+echo "------ Sending SIGINT, Scuttle should pass to child, child should exit, scuttle should exit ------ "
+kill -INT $scuttle_pid
+# Print "." until process ends
 while 1>0; do echo -n "." && sleep 1; done;

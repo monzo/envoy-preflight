@@ -1,9 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type Config struct {
@@ -17,17 +18,11 @@ type Config struct {
 	GenericQuitEndpoints    []string
 }
 
-func log(message string) {
-	if config.LoggingEnabled {
-		println("envoy-preflight: " + message)
-	}
-}
-
 func getConfig() Config {
 	loggingEnabled := getBoolFromEnv("ENVOY_PREFLIGHT_LOGGING", true, false)
 
 	if getStringFromEnv("ENVOY_KILL_API", "", false) != "" {
-		log("Warning: don't use ENVOY_KILL_API but ISTIO_QUIT_API instead")
+		log.Error("don't use ENVOY_KILL_API but ISTIO_QUIT_API instead")
 	}
 
 	defaultEnvoyAdminAPI := ""
@@ -61,7 +56,7 @@ func getStringArrayFromEnv(name string, defaultVal []string, logEnabled bool) []
 	}
 
 	if logEnabled {
-		log(fmt.Sprintf("%s: %s", name, userValCsv))
+		log.Infof("%s: %s", name, userValCsv)
 	}
 
 	userValArray := strings.Split(userValCsv, ",")
@@ -75,7 +70,7 @@ func getStringArrayFromEnv(name string, defaultVal []string, logEnabled bool) []
 func getStringFromEnv(name string, defaultVal string, logEnabled bool) string {
 	userVal := os.Getenv(name)
 	if logEnabled {
-		log(fmt.Sprintf("%s: %s", name, userVal))
+		log.Infof("%s: %s", name, userVal)
 	}
 	if userVal != "" {
 		return userVal
@@ -93,14 +88,14 @@ func getBoolFromEnv(name string, defaultVal bool, logEnabled bool) bool {
 	// User set something, check it is valid
 	if userVal != "true" && userVal != "false" {
 		if logEnabled {
-			log(fmt.Sprintf("%s: %s (Invalid value will be ignored)", name, userVal))
+			log.Infof("%s: %s (Invalid value will be ignored)", name, userVal)
 		}
 		return defaultVal
 	}
 
 	// User gave valid option
 	if logEnabled {
-		log(fmt.Sprintf("%s: %s", name, userVal))
+		log.Infof("%s: %s", name, userVal)
 	}
 	return (userVal == "true")
 }

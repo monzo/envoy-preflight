@@ -23,4 +23,6 @@ jobs:
           go-version: "^1.13"
 
       - name: Release
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: curl -sL https://git.io/goreleaser | bash

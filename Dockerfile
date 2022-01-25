@@ -1,4 +1,4 @@
-FROM golang:buster AS build
+FROM golang:1.17-buster AS build
 ARG VERSION="local"
 COPY . /app
 WORKDIR /app

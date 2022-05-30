@@ -12,4 +12,5 @@ require (
 	github.com/monzo/typhon v0.0.0-20190413083455-45c89a830a76
 	github.com/stretchr/testify v1.6.1 // indirect
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381 // indirect
+	golang.org/x/text v0.3.3 // indirect; https://nvd.nist.gov/vuln/detail/CVE-2020-14040
 )

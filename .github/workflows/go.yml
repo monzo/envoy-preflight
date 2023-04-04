@@ -5,16 +5,14 @@ on:
     types: [created, edited]
 
 jobs:
-
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
-
     - name: Set up Go 1.x
       uses: actions/setup-go@v2
       with:
-        go-version: ^1.13
+        go-version: ^1.20
       id: go
 
     - name: Check out code into GOPATH
@@ -32,10 +30,6 @@ jobs:
         GOPATH: ${{ github.workspace	}}/go
       run: |
         go get -v -t -d ./...
-        if [ -f Gopkg.toml ]; then
-            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-            ${{ github.workspace }}/go/bin/dep ensure
-        fi
 
     - name: Build
       working-directory: go/src/github.com/monzo/envoy-preflight
@@ -43,9 +37,25 @@ jobs:
         GOPATH: ${{ github.workspace }}/go
       run: go build -v .
     
-    - name: Move binary
-      run: cp ${{ github.workspace }}/go/src/github.com/monzo/envoy-preflight/envoy-preflight ${{ github.workspace }}
-      
+    - name: Archive binary
+      uses: actions/upload-artifact@v3
+      with:
+        name: envoy-preflight
+        path: ${{ github.workspace }}/go/src/github.com/monzo/envoy-preflight/envoy-preflight
+        retention-days: 1
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: build 
+    permissions:
+      contents: write
+    steps:
+    - name: Fetch binary
+      uses: actions/download-artifact@v3
+      with:
+        name: envoy-preflight
+
     - name: Release binary
       uses: skx/github-action-publish-binaries@release-0.14
       env:

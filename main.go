@@ -133,9 +133,12 @@ func killIstioWithAPI() {
 
 	url := fmt.Sprintf("%s/quitquitquit", config.IstioQuitAPI)
 	resp := typhon.NewRequest(context.Background(), "POST", url, nil).Send().Response()
-	log.Infof("sent quitquitquit to Istio, status code: %d", resp.StatusCode)
-
-	if resp.StatusCode != 200 && config.IstioFallbackPkill {
+	if resp != nill {
+	    log.Infof("sent quitquitquit to Istio, status code: %d", resp.StatusCode)
+    } else {
+        log.Infof("sending quitquitquit to Istio returned no response")
+    }
+	if (resp == nill || resp.StatusCode != 200) && config.IstioFallbackPkill {
 		log.Error("quitquitquit failed, will attempt pkill method")
 		killIstioWithPkill()
 	}

@@ -108,7 +108,11 @@ func kill(exitCode int) {
 	default:
 		// Stop istio using api
 		killGenericEndpoints()
-		killIstioWithAPI()
+		status, error := killIstioWithAPI()
+		if (error != nil || status != 200) && config.IstioFallbackPkill {
+			log.Error("quitquitquit failed, will attempt pkill method")
+			killIstioWithPkill()
+		}
 	}
 }
 
@@ -123,25 +127,27 @@ func killGenericEndpoints() {
 		if resp.Error != nil {
 			log.Errorf("sent POST to '%s', error: %s", genericEndpoint, resp.Error)
 			continue
+		} else {
+			log.Infof("sent POST to '%s', status code: %v", genericEndpoint, resp.StatusCode)
 		}
-		log.Infof("sent POST to '%s', status code: %v", genericEndpoint, resp.StatusCode)
 	}
 }
 
-func killIstioWithAPI() {
+func killIstioWithAPI() (int, error) {
 	log.Infof("stopping  Istio using Istio API '%s' (intended for Istio >v1.2)", config.IstioQuitAPI)
 
 	url := fmt.Sprintf("%s/quitquitquit", config.IstioQuitAPI)
 	resp := typhon.NewRequest(context.Background(), "POST", url, nil).Send().Response()
+	if resp.Error != nil {
+		log.Errorf("sent POST to '%s', error: %s", url, resp.Error)
+		return 200, resp.Error
+	}
 	log.Infof("sent quitquitquit to Istio, status code: %d", resp.StatusCode)
 
-	if resp.StatusCode != 200 && config.IstioFallbackPkill {
-		log.Error("quitquitquit failed, will attempt pkill method")
-		killIstioWithPkill()
-	}
+	return resp.StatusCode, resp.Error
 }
 
-func killIstioWithPkill() {
+func killIstioWithPkill() error {
 	log.Info("stopping Istio using pkill command (intended for Istio <v1.3)")
 	cmd := exec.Command("sh", "-c", "pkill -SIGINT pilot-agent")
 	_, err := cmd.Output()
@@ -151,6 +157,7 @@ func killIstioWithPkill() {
 		errorMessage := err.Error()
 		log.Errorf("pilot-agent could not be stopped, err: " + errorMessage)
 	}
+	return err
 }
 
 func block() {

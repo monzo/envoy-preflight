@@ -109,3 +109,13 @@ func TestGenericQuitEndpoints(t *testing.T) {
 	envoyDelayTimestamp = time.Now().Unix()
 	initAndRun(1)
 }
+
+// Tests API quit endpoints to wrong API URL fallback to pkill
+func TestApiQuitEndpoints(t *testing.T) {
+	fmt.Println("Starting TestAPIQuitEndpoints")
+	os.Setenv("START_WITHOUT_ENVOY", "false")
+	os.Setenv("ISTIO_FALLBACK_PKILL", "true")
+	os.Setenv("ISTIO_QUIT_API", "http://127.0.0.1:15555")
+	os.Setenv("ENVOY_ADMIN_API", goodServer.URL)
+	initAndRun(1)
+}

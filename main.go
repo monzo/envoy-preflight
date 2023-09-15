@@ -125,7 +125,7 @@ func killGenericEndpoints() {
 		genericEndpoint = strings.Trim(genericEndpoint, " ")
 		resp := typhon.NewRequest(context.Background(), "POST", genericEndpoint, nil).Send().Response()
 		if resp.Error != nil {
-			log.Errorf("sent POST to '%s', error: %s", genericEndpoint, resp.Error)
+			log.Warnf("sent POST to '%s', error: %s", genericEndpoint, resp.Error)
 			continue
 		} else {
 			log.Infof("sent POST to '%s', status code: %v", genericEndpoint, resp.StatusCode)
@@ -139,7 +139,7 @@ func killIstioWithAPI() (int, error) {
 	url := fmt.Sprintf("%s/quitquitquit", config.IstioQuitAPI)
 	resp := typhon.NewRequest(context.Background(), "POST", url, nil).Send().Response()
 	if resp.Error != nil {
-		log.Errorf("sent POST to '%s', error: %s", url, resp.Error)
+		log.Warnf("sent POST to '%s', error: %s", url, resp.Error)
 		return 200, resp.Error
 	}
 	log.Infof("sent quitquitquit to Istio, status code: %d", resp.StatusCode)
